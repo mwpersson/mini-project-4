@@ -13,4 +13,12 @@ venv/
 .DS_Store
 Thumbs.db
 
+# Data files
 data/
+
+# Python cache
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.pytest_cache/
