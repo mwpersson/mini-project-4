@@ -19,58 +19,18 @@ class FashionClassifierVision(nn.Module):
         x = self.fc2(x)
         return x
     
-class FashionClassifier0(nn.Module):
-    def __init__(self, input_size=28*28, hidden_size=64, num_classes=10):
+class FashionClassifier(nn.Module):
+    def __init__(self, input_size=28*28, hidden_size=64, num_classes=10, hidden_layers=1, activation_fn=F.relu):
         super().__init__()
-        self.fc1 = nn.Linear(input_size, hidden_size)
-        self.fc2 = nn.Linear(hidden_size, num_classes)
-        
-    def forward(self, x):
-        x = F.relu(self.fc1(x))
-        x = self.fc2(x)
-        return x
+        self.hidden_layers = hidden_layers
+        self.activation_fn = activation_fn
 
-class FashionClassifier1(nn.Module):
-    def __init__(self, input_size=28*28, hidden_size=128, num_classes=10):
-        super().__init__()
-        self.fc1 = nn.Linear(input_size, hidden_size)
-        self.fc2 = nn.Linear(hidden_size, hidden_size)
-        self.fc3 = nn.Linear(hidden_size, num_classes)
+        for i in range(hidden_layers - 1):
+            setattr(self, f'fc{i+1}', nn.Linear(input_size if i == 0 else hidden_size, hidden_size))
+        setattr(self, f'fc{hidden_layers}', nn.Linear(hidden_size if hidden_layers > 1 else input_size, num_classes))
         
     def forward(self, x):
-        x = F.relu(self.fc1(x))
-        x = F.relu(self.fc2(x))
-        x = self.fc3(x)
-        return x
-    
-class FashionClassifier2(nn.Module):
-    def __init__(self, input_size=28*28, hidden_size=256, num_classes=10):
-        super().__init__()
-        self.fc1 = nn.Linear(input_size, hidden_size)
-        self.fc2 = nn.Linear(hidden_size, hidden_size)
-        self.fc3 = nn.Linear(hidden_size, hidden_size)
-        self.fc4 = nn.Linear(hidden_size, num_classes)
-        
-    def forward(self, x):
-        x = F.relu(self.fc1(x))
-        x = F.relu(self.fc2(x))
-        x = F.relu(self.fc3(x))
-        x = self.fc4(x)
-        return x
-    
-class FashionClassifier3(nn.Module):
-    def __init__(self, input_size=28*28, hidden_size=512, num_classes=10):
-        super().__init__()
-        self.fc1 = nn.Linear(input_size, hidden_size)
-        self.fc2 = nn.Linear(hidden_size, hidden_size)
-        self.fc3 = nn.Linear(hidden_size, hidden_size)
-        self.fc4 = nn.Linear(hidden_size, hidden_size)
-        self.fc5 = nn.Linear(hidden_size, num_classes)
-        
-    def forward(self, x):
-        x = F.relu(self.fc1(x))
-        x = F.relu(self.fc2(x))
-        x = F.relu(self.fc3(x))
-        x = F.relu(self.fc4(x))
-        x = self.fc5(x)
+        for i in range(self.hidden_layers - 1):
+            x = self.activation_fn(getattr(self, f'fc{i+1}')(x))
+        x = getattr(self, f'fc{self.hidden_layers}')(x)
         return x
