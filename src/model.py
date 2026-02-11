@@ -20,10 +20,14 @@ class FashionClassifierVision(nn.Module):
         return x
     
 class FashionClassifier(nn.Module):
-    def __init__(self, input_size=28*28, hidden_size=64, num_classes=10, hidden_layers=1, activation_fn=F.relu):
+    def __init__(self, input_size=28*28, hidden_size=64, num_classes=10, hidden_layers=1, activation_fn=F.relu, dropout_prob=0.3, batch_norm=False):
         super().__init__()
         self.hidden_layers = hidden_layers
         self.activation_fn = activation_fn
+        self.dropout = nn.Dropout(dropout_prob)
+        self.batch_norm = batch_norm
+        if self.batch_norm:
+            self.bn_layers = nn.ModuleList([nn.BatchNorm1d(hidden_size) for _ in range(hidden_layers - 1)])
 
         for i in range(hidden_layers - 1):
             setattr(self, f'fc{i+1}', nn.Linear(input_size if i == 0 else hidden_size, hidden_size))
@@ -32,5 +36,8 @@ class FashionClassifier(nn.Module):
     def forward(self, x):
         for i in range(self.hidden_layers - 1):
             x = self.activation_fn(getattr(self, f'fc{i+1}')(x))
+            if self.batch_norm:
+                x = self.bn_layers[i](x)
+            x = self.dropout(x)
         x = getattr(self, f'fc{self.hidden_layers}')(x)
         return x
