@@ -2,6 +2,8 @@ import torch
 
 def train_model(model, train_loader, val_loader, criterion, optimizer, epochs=5, device='cpu'):
     model.to(device)
+    loss_history = []
+    accuracy_history = []
     for epoch in range(epochs):
         model.train()
         for images, labels in train_loader:
@@ -12,7 +14,11 @@ def train_model(model, train_loader, val_loader, criterion, optimizer, epochs=5,
             loss.backward()
             optimizer.step()
         print(f'Epoch [{epoch+1}/{epochs}] - Loss: {loss.item():.4f}')
-        evaluate_model(model, val_loader, device)
+        accuracy = evaluate_model(model, val_loader, device)
+        loss_history.append(loss.item())
+        accuracy_history.append(accuracy)
+
+    return loss_history, accuracy_history
 
 def evaluate_model(model, test_loader, device='cpu'):
     model.eval()
