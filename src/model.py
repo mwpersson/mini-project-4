@@ -20,7 +20,7 @@ class FashionClassifierVision(nn.Module):
         return x
     
 class FashionClassifier(nn.Module):
-    def __init__(self, input_size=28*28, hidden_size=64, num_classes=10, hidden_layers=1, activation_fn=F.relu, dropout_prob=0.3, batch_norm=False):
+    def __init__(self, input_size=28*28, hidden_size=64, num_classes=10, hidden_layers=1, activation_fn=F.relu, dropout_prob=0.0, batch_norm=False):
         super().__init__()
         self.hidden_layers = hidden_layers
         self.activation_fn = activation_fn
