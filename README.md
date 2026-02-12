@@ -15,25 +15,33 @@ This project builds a **product image classification system** using deep learnin
 ## Approach and Methodology
 
 ### Framework
-- **PyTorch** with custom `nn.Module` classes and manual training loops
+- **PyTorch** with custom `nn.Module` class and manual training loop
 
 ### Dataset
 - **Fashion-MNIST**: 60,000 training images, 10,000 test images, 28×28 grayscale, 10 classes
-- Split: 50,000 train / 10,000 validation / 10,000 test
+- Split: 54,000 train / 6,000 validation / 10,000 test
 
-### Model Architectures (3 Experiments)
+### Model Architecture
 
-| Model | Architecture | Activation | Regularization | Optimizer |
-|-------|-------------|------------|----------------|-----------|
-| V1 (Baseline) | 784→256→10 | ReLU | None | Adam (lr=0.001) |
-| V2 (Improved) | 784→512→256→10 | ReLU | Dropout(0.3) | Adam (lr=0.001) |
-| V3 (Best) | 784→512→256→128→10 | LeakyReLU | BatchNorm + Dropout(0.3) | AdamW (lr=0.001) + StepLR |
+We define a flexible `FashionClassifier` class using `nn.Module` that supports configurable depth, width, activation function, batch normalization, and dropout. This allows systematic comparison of different configurations.
+
+### Experiments (5 Configurations)
+
+| Classifier | Layers | Activation | Hidden Size | Batch Norm | Optimizer |
+|-----------|--------|-----------|-------------|-----------|-----------|
+| 1 (Best) | 3 | ELU | 512 | Yes | Adam |
+| 2 | 3 | ReLU | 256 | No | Adam |
+| 3 | 2 | ReLU | 256 | No | Adam |
+| 4 | 3 | ReLU | 128 | Yes | Adam |
+| 5 | 2 | ELU | 256 | Yes | AdamW |
+
+These configurations were selected based on a prior hyperparameter grid search over hidden layers, activation functions, hidden sizes, optimizers, batch normalization, and dropout rates.
 
 ### Key Findings
-- **V3 achieves >85% test accuracy**, meeting the business requirement
-- Batch normalization + dropout combination provides the best regularization
-- LeakyReLU provides marginal improvement over ReLU for deeper networks
-- AdamW with learning rate scheduling helps convergence
+- **Classifier 1 achieves >85% test accuracy**, meeting the business requirement
+- Batch normalization significantly improved training stability and final accuracy
+- ELU activation provided a slight edge over ReLU in deeper architectures
+- Larger hidden sizes (512) outperformed smaller ones when combined with batch normalization
 
 ## Results Summary
 
@@ -51,7 +59,7 @@ This project builds a **product image classification system** using deep learnin
 
 ## Business Recommendations
 
-1. **Deploy V3 model** with 80% confidence threshold for auto-classification
+1. **Deploy best model** with 80% confidence threshold for auto-classification
 2. **Improve photography guidelines** for Shirt vs T-shirt (require collar/button visibility) and Coat vs Pullover (require side-view photos)
 3. **Prioritize human review** for high-cost category pairs
 4. **Future work**: CNN architectures, higher-resolution images, data augmentation, transfer learning
@@ -61,7 +69,7 @@ This project builds a **product image classification system** using deep learnin
 ### Option 1: Google Colab (Recommended)
 1. Open `notebooks/fashion_classifier.ipynb` in Google Colab
 2. Set runtime to GPU (Runtime → Change runtime type → T4 GPU)
-3. Run all cells
+3. Run all cells — the notebook is fully self-contained
 
 ### Option 2: Local Setup
 ```bash
@@ -98,7 +106,7 @@ mini-project-4/
 │   └── fashion_classifier.ipynb   # Main Colab notebook (run this)
 ├── src/
 │   ├── __init__.py
-│   ├── model.py                   # nn.Module model definitions
+│   ├── model.py                   # nn.Module model definition
 │   ├── train.py                   # Custom training loop
 │   └── utils.py                   # Helper/utility functions
 └── results/                       # Generated after running notebook
@@ -107,13 +115,8 @@ mini-project-4/
 ├── confidence_threshold.png
 └── misclassified_examples.png
 ```
+
 ## Team Member Contributions
 
-| Team Member | Contributions |
-|-------------|---------------|
-| Luying Cai | Confidence threshold analysis, all written analysis and documentation, business recommendations, per-class metrics, figure exports, and Colab integration. |
-| Michael Persson | core framework (model, training, confusion matrix, cost analysis, misclassification visualization) and achieved >85% accuracy.  |
-
-## License
-
-This project is for educational purposes as part of COMP 9130 coursework.
+- **[Michael Persson]:** Model architecture design, hyperparameter grid search, training pipeline, confusion matrix visualization, cost matrix and cost-weighted accuracy analysis, misclassification visualization
+- **[Savina Cai]:** Confidence threshold analysis and dual-axis plot, all markdown documentation and methodology narrative, per-class precision/recall/F1 metrics, business recommendations for StyleSort, confidence scores on misclassification visualization, figure exports to results directory, Colab integration
